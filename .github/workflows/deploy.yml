@@ -1,0 +1,51 @@
+name: Deploy Next.js Docker to VPS
+
+on:
+  push:
+    branches:
+      - main  # Deploy khi push code lên main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "."
+          target: "/home/petd/tiktok-connect/fe"
+
+      - name: SSH vào VPS và deploy Docker
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /home/petd/tiktok-connect/fe
+            
+            # Pull latest code from the repository
+            git pull origin main
+
+            # Dừng và xóa các container cũ
+            docker compose down
+            
+            # Làm sạch các image cũ (nếu cần)
+            docker system prune -f
+          
+            # Xây dựng lại các container với các thay đổi mới
+            docker compose build
+
+            # Chạy lại container trong chế độ detached (nền)
+            docker compose up -d
+            
+            docker image prune -f 
+
+
