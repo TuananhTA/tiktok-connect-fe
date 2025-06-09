@@ -17,10 +17,10 @@ COPY . .
 RUN npm run build
 
 # Expose cổng mà Next.js sử dụng (mặc định là 3000)
-EXPOSE 3001
+EXPOSE 3000
 
 # Thiết lập biến môi trường (mặc định là production)
 ENV NODE_ENV=production
 
 # Chạy ứng dụng
-CMD ["npm", "start", "--", "-p", "3001"]
+CMD ["npm", "start"]
